@@ -1,0 +1,20 @@
+[project]
+name = "shopify-class-based-example"
+version = "0.1.0"
+description = "Generic Shopify connector example for vested-connect-sdk."
+requires-python = ">=3.10"
+dependencies = [
+    "vested-connect-sdk>=0.2,<0.3",
+    "httpx>=0.27",
+    "asyncpg>=0.29",
+    "pydantic>=2.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]

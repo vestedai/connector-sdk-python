@@ -1,0 +1,67 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vested-connect-sdk"
+version = "0.2.0"
+description = "Official Python SDK for the Vested AI ConnectorHub."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+authors = [{ name = "Vested AI" }]
+keywords = ["vested-ai", "grpc", "connector", "ai", "sdk", "asyncio"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Framework :: AsyncIO",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "grpcio>=1.60",
+    "grpcio-tools>=1.60",
+    "protobuf>=4.25",
+    "pydantic>=2.5,<3",
+    "PyJWT>=2.8",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "pytest-asyncio>=0.23",
+    "mypy>=1.8",
+    "ruff>=0.5",
+    "types-protobuf",
+]
+
+[project.scripts]
+vested-connect = "vested_connect.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/vestedai/connector-sdk-python"
+Documentation = "https://github.com/vestedai/connector-sdk-python/tree/main/docs"
+Repository = "https://github.com/vestedai/connector-sdk-python"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.mypy]
+strict = true
+python_version = "3.10"
+files = ["src/vested_connect", "tests"]
+exclude = ["src/vested_connect/proto/"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+exclude = ["src/vested_connect/proto/"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "ASYNC"]
+ignore = []

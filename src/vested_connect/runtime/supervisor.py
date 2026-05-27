@@ -59,11 +59,6 @@ async def run_supervised(
             if exit_code == 78:
                 return 78
 
-            # exit_code 0 means the daemon exited cleanly (GoAway "shutdown"
-            # or signal). Do not reconnect.
-            if exit_code == 0:
-                return 0
-
             if handshake_completed:
                 backoff.reset()
             delay_ms = backoff.next()

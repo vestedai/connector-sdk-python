@@ -1,10 +1,14 @@
 """Integration tests: full daemon session against the in-process fake hub.
 
 Covers:
-  - Happy path: Hello → HelloAck → Register → RegisterAck(accepted) →
-    ToolCallRequest → ToolCallResponse → GoAway("shutdown") → exit 0.
+  - Roundtrip: Hello → HelloAck → Register → RegisterAck(accepted) →
+    ToolCallRequest → ToolCallResponse → GoAway("revoked") → exit 78.
+    We use "revoked" rather than "shutdown" because shutdown is meant to
+    trigger a reconnect (hub bounce); only revoked terminates the supervisor
+    cleanly from the hub side. The tool roundtrip assertions are the point
+    of this test, not the terminal exit code.
   - Register rejected → exit 78.
-  - GoAway("revoked") mid-stream → exit 78 (daemon raises TokenError).
+  - GoAway("revoked") with no prior tool calls → exit 78.
 """
 
 from __future__ import annotations
@@ -54,7 +58,9 @@ def _build_app() -> ConnectorApp:
 
 @pytest.mark.asyncio
 async def test_full_session_roundtrip() -> None:
-    """Daemon connects, registers, handles a tool call, exits cleanly on GoAway."""
+    """Daemon connects, registers, handles a tool call, then terminates on
+    GoAway('revoked'). Exit 78 here is the terminator, not the focus —
+    the assertions on the tool response are."""
     script = FakeHubScript(
         accept_register=True,
         tool_calls=[
@@ -64,7 +70,7 @@ async def test_full_session_roundtrip() -> None:
                 expected_invocation_id="inv-1",
             )
         ],
-        final_goaway_reason="shutdown",
+        final_goaway_reason="revoked",
     )
     async with fake_hub(script) as (hub, port):
         exit_code = await run_supervised(
@@ -75,7 +81,7 @@ async def test_full_session_roundtrip() -> None:
             insecure=True,
         )
 
-    assert exit_code == 0, f"expected exit 0, got {exit_code}"
+    assert exit_code == 78, f"expected exit 78 (revoked), got {exit_code}"
     assert hub.received_hello is not None, "hub never received Hello"
     assert hub.received_register is not None, "hub never received Register"
     assert len(hub.received_tool_responses) == 1, (

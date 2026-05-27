@@ -125,10 +125,9 @@ class Daemon:
                 logger.warning("GoAway from hub: %s", reason)
                 if reason in ("revoked", "token_revoked"):
                     raise TokenError(f"hub revoked stream: {reason}")
-                # "shutdown" (and any other non-revoke reason) is a graceful
-                # server-side close; return 0 so the supervisor does not retry.
-                if reason in ("shutdown", ""):
-                    return 0
+                # Any other reason (e.g. "shutdown" during a hub deploy) is a
+                # transient close. Return 1 so the supervisor reconnects after
+                # backoff — keeps the worker warm across hub rollouts.
                 return 1
         return 0
 

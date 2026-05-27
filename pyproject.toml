@@ -57,6 +57,11 @@ python_version = "3.10"
 files = ["src/vested_connect", "tests"]
 exclude = ["src/vested_connect/proto/"]
 
+[[tool.mypy.overrides]]
+# vested_connect.app does not exist until H-5; TYPE_CHECKING imports only.
+module = ["vested_connect.app"]
+ignore_missing_imports = true
+
 [tool.ruff]
 line-length = 100
 target-version = "py310"

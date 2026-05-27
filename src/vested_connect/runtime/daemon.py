@@ -17,6 +17,7 @@ from .signals import SignalHandler
 if TYPE_CHECKING:
     from vested_connect.app import ConnectorApp
 
+    from .dispatcher import Dispatcher
     from .grpc_client import GrpcClient
 
 logger = logging.getLogger("vested_connect.daemon")
@@ -38,6 +39,7 @@ class Daemon:
         client: GrpcClient,
         *,
         signals: SignalHandler,
+        dispatcher: Dispatcher | None = None,
         recv_timeout_s: float = 0.1,
     ) -> None:
         self.app = app
@@ -45,6 +47,7 @@ class Daemon:
         self.signals = signals
         self.handshake_completed = False
         self._heartbeat: HeartbeatTimer | None = None
+        self._dispatcher = dispatcher
         # recv_timeout_s is a placeholder for future poll-tuning; stored but not yet used.
         self._recv_timeout_s = recv_timeout_s
 
@@ -108,12 +111,13 @@ class Daemon:
                 logger.info("stream closed: %s", e)
                 return 1
             if msg.HasField("tool_call_request"):
-                # TODO(H-4): wire Dispatcher here.
-                logger.debug(
-                    "tool_call_request invocation_id=%s tool=%s",
-                    msg.tool_call_request.invocation_id,
-                    msg.tool_call_request.tool_key,
-                )
+                if self._dispatcher is None:
+                    logger.warning(
+                        "tool_call_request received but no dispatcher configured (tool=%s)",
+                        msg.tool_call_request.tool_key,
+                    )
+                else:
+                    self._dispatcher.dispatch(msg.tool_call_request)
             elif msg.HasField("heartbeat_ack"):
                 pass  # no-op
             elif msg.HasField("go_away"):

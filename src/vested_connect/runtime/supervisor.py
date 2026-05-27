@@ -10,6 +10,7 @@ from vested_connect.errors import TokenError
 
 from .backoff import Backoff
 from .daemon import Daemon
+from .dispatcher import Dispatcher
 from .grpc_client import GrpcClient
 from .signals import SignalHandler
 
@@ -42,7 +43,8 @@ async def run_supervised(
             exit_code = 1
             try:
                 async with GrpcClient(host, port, token, insecure=insecure) as client:
-                    daemon = Daemon(app, client, signals=signals)
+                    dispatcher = Dispatcher(app.tools, client)
+                    daemon = Daemon(app, client, signals=signals, dispatcher=dispatcher)
                     exit_code = await daemon.run()
                     handshake_completed = daemon.handshake_completed
             except TokenError as e:

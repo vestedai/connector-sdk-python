@@ -31,7 +31,7 @@ async def test_supervisor_returns_78_on_token_error(monkeypatch: pytest.MonkeyPa
             return None
 
     class StubDaemon:
-        def __init__(self, app: object, client: object, *, signals: object) -> None:
+        def __init__(self, app: object, client: object, *, signals: object, **kw: object) -> None:
             self.handshake_completed = False
 
         async def run(self) -> int:
@@ -59,7 +59,7 @@ async def test_supervisor_retries_then_exits_on_signal(monkeypatch: pytest.Monke
             return None
 
     class StubDaemon:
-        def __init__(self, app: object, client: object, *, signals: object) -> None:
+        def __init__(self, app: object, client: object, *, signals: object, **kw: object) -> None:
             self.handshake_completed = False
             self._signals = signals
 

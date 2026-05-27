@@ -1,6 +1,25 @@
 """Vested AI Connector SDK — Python.
 
-Public re-exports land in H-2 onwards. For now, just expose the version.
+Public re-exports. Customers import from `vested_connect`, not the submodules.
 """
+
+from pydantic import BaseModel, Field
+
+from .agent import Instruction, agent
+from .errors import ConnectorError, TokenError, ToolValidationError
+from .tool import ToolContext, ToolHandler, tool
+
+__all__ = [
+    "agent",
+    "tool",
+    "Instruction",
+    "ToolHandler",
+    "ToolContext",
+    "BaseModel",
+    "Field",
+    "ConnectorError",
+    "TokenError",
+    "ToolValidationError",
+]
 
 __version__ = "0.2.0"

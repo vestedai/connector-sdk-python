@@ -40,7 +40,7 @@ async def test_supervisor_returns_78_on_token_error(monkeypatch: pytest.MonkeyPa
     monkeypatch.setattr(supervisor_mod, "GrpcClient", StubClient)
     monkeypatch.setattr(supervisor_mod, "Daemon", StubDaemon)
 
-    code = await supervisor_mod.run_supervised(_StubApp(), "tok", "host", 4443)
+    code = await supervisor_mod.run_supervised(_StubApp(), "tok", "host", 4443)  # type: ignore[arg-type]
     assert code == 78
 
 
@@ -83,6 +83,6 @@ async def test_supervisor_retries_then_exits_on_signal(monkeypatch: pytest.Monke
 
     monkeypatch.setattr(supervisor_mod, "Backoff", FastBackoff)
 
-    code = await supervisor_mod.run_supervised(_StubApp(), "tok", "host", 4443)
+    code = await supervisor_mod.run_supervised(_StubApp(), "tok", "host", 4443)  # type: ignore[arg-type]
     assert code == 0
     assert attempts["n"] >= 2

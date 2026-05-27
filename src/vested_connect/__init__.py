@@ -6,10 +6,12 @@ Public re-exports. Customers import from `vested_connect`, not the submodules.
 from pydantic import BaseModel, Field
 
 from .agent import Instruction, agent
+from .app import ConnectorApp
 from .errors import ConnectorError, TokenError, ToolValidationError
 from .tool import ToolContext, ToolHandler, tool
 
 __all__ = [
+    "ConnectorApp",
     "agent",
     "tool",
     "Instruction",

@@ -147,4 +147,7 @@ jobs:
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-        run: twine upload --non-interactive dist/*
+        # --skip-existing makes the upload idempotent: a workflow re-run
+        # (or a re-tag after a partial-failure release) won't 400 if the
+        # version is already on PyPI.
+        run: twine upload --non-interactive --skip-existing dist/*

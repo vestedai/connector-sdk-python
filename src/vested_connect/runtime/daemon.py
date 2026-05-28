@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING
 from vested_connect.errors import ConnectorError, TokenError
 from vested_connect.proto import connector_hub_pb2 as pb
 
+from .fingerprint import compute_fingerprint
 from .heartbeat import HeartbeatTimer
 from .signals import SignalHandler
 
@@ -134,10 +135,12 @@ class Daemon:
     def _build_register(self) -> pb.ConnectorMsg:
         msg = pb.ConnectorMsg()
         reg = msg.register
-        # The fingerprint goes on the wire; recompute from app's agent decls.
-        # H-3 ships a placeholder; H-4 / H-5 may wire the real fingerprint
-        # from a deterministic encoding of the agent declarations.
-        reg.baseline_fingerprint = ""
+        # SHA256 over the canonical declaration shape. Non-empty fingerprint
+        # is REQUIRED — the hub's in-memory store starts at "" so an empty
+        # fingerprint trivially matches, the hub short-circuits "accepted"
+        # without ever reconciling to Laravel, and agents/tools never land
+        # in the DB. See runtime/fingerprint.py for the canonical shape.
+        reg.baseline_fingerprint = compute_fingerprint(self.app.agents, self.app.tools)
         for agent_decl in self.app.agents:
             a = reg.agents.add()
             a.key = agent_decl.key

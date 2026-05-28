@@ -64,6 +64,12 @@ The following are PHP-specific implementation details. They are documented here 
 
 ## v0.2.x Patch Notes
 
+### v0.2.1 — fix: send non-empty baseline_fingerprint at Register
+
+The hub short-circuits re-registration when the incoming fingerprint matches the value it has stored for the connector. Its in-memory store starts at `""`. In v0.2.0 the SDK sent `baseline_fingerprint=""` at every Register — that trivially matched the empty initial value, the hub returned `"accepted"` without forwarding to Laravel, and the connector's agents/tools never persisted to the DB. Symptom: SDK logs "registered with hub" but the admin-ui never shows any agents under the connector.
+
+Fix: compute a deterministic SHA256 over the canonical agent + tool declarations and send it as `baseline_fingerprint`. Required upgrade.
+
 ### v0.2.0 — Initial Python release
 
 First Python SDK implementation. asyncio + grpcio runtime. Decorator-first API (`@agent`, `@tool`). Pydantic v2 schema generation. Feature parity with PHP SDK v0.2.4 on the wire. Available on [PyPI](https://pypi.org/project/vested-connect-sdk/) (`pip install vested-connect-sdk`) and [Docker Hub](https://hub.docker.com/r/vestedai/vested-ai-connector-sdk-python).

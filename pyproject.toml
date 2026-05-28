@@ -34,6 +34,7 @@ dev = [
     "mypy>=1.8",
     "ruff>=0.5",
     "types-protobuf",
+    "types-grpcio",
 ]
 
 [project.scripts]

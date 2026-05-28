@@ -64,9 +64,9 @@ The following are PHP-specific implementation details. They are documented here 
 
 ## v0.2.x Patch Notes
 
-### v0.2.0-dev — Initial Python release
+### v0.2.0 — Initial Python release
 
-First Python SDK implementation. asyncio + grpcio runtime. Decorator-first API (`@agent`, `@tool`). Pydantic v2 schema generation. Not yet on PyPI; install from source. Feature parity with PHP SDK v0.2.4 on the wire.
+First Python SDK implementation. asyncio + grpcio runtime. Decorator-first API (`@agent`, `@tool`). Pydantic v2 schema generation. Feature parity with PHP SDK v0.2.4 on the wire. Available on [PyPI](https://pypi.org/project/vested-connect-sdk/) (`pip install vested-connect-sdk`) and [Docker Hub](https://hub.docker.com/r/vestedai/vested-ai-connector-sdk-python).
 
 ## Next
 

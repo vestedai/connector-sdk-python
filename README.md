@@ -1,18 +1,19 @@
 # Vested AI Connector SDK (Python)
 
-![Build](https://img.shields.io/github/actions/workflow/status/vestedsystems/connector-sdk-python/ci.yml?branch=main)
-![License](https://img.shields.io/github/license/vestedsystems/connector-sdk-python)
-![Python](https://img.shields.io/badge/python-%5E3.11-blue)
+![Build](https://img.shields.io/github/actions/workflow/status/vestedai/connector-sdk-python/ci.yml?branch=main)
+![PyPI](https://img.shields.io/pypi/v/vested-connect-sdk)
+![License](https://img.shields.io/github/license/vestedai/connector-sdk-python)
+![Python](https://img.shields.io/badge/python-%3E%3D3.10-blue)
 
 Connect any Python service to the Vested AI platform. The SDK opens a long-lived gRPC stream to the hub, declares agents and tools over that stream, and dispatches tool calls to your handler code — no polling, no webhook setup, no managing your own LLM client. The hub handles model selection, prompt composition, and conversation state; your connector owns the business logic.
 
 ## Install
 
-> **Coming soon to PyPI.** The package will be published as `vested-connect-sdk` when v0.2.0 ships. Until then, install from source.
-
 ```bash
 pip install vested-connect-sdk
 ```
+
+Or run the Docker image: `vestedai/vested-ai-connector-sdk-python:0.2.0` (also `:latest`, multi-arch amd64/arm64).
 
 ## 5-Line Connector
 
@@ -51,4 +52,4 @@ This differs from writing your own LLM client. The connector does not call the L
 
 ## License + Status
 
-MIT. Current release: **v0.2.0-dev** (asyncio + grpcio runtime, decorator API, Pydantic v2 schema generation). Pre-release; not yet on PyPI.
+MIT. Current release: **v0.2.0** (asyncio + grpcio runtime, decorator API, Pydantic v2 schema generation). On PyPI as [`vested-connect-sdk`](https://pypi.org/project/vested-connect-sdk/) and Docker Hub as [`vestedai/vested-ai-connector-sdk-python`](https://hub.docker.com/r/vestedai/vested-ai-connector-sdk-python).

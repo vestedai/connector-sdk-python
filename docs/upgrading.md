@@ -64,6 +64,24 @@ The following are PHP-specific implementation details. They are documented here 
 
 ---
 
+## v0.4.0 Release Notes
+
+### v0.4.0 — feat: ERP identity on ToolContext (L-3)
+
+`ToolContext` gains three nullable ERP/HR identity fields, populated from the incoming `ToolCallRequest` (proto fields 10-12):
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `employee_no` | `str` | `""` | Calling user's HR/ERP employee number. |
+| `erp_identifier` | `str` | `""` | Calling user's ERP system identifier (e.g. SAP user ID). |
+| `erp_department_identifiers` | `tuple[str, ...]` | `()` | ERP identifiers of every department the user belongs to in the run's org. |
+
+All three default to `""` / `()` when the hub does not supply them (system runs, older hub versions). The proto binding (`connector_hub_pb2`) has been regenerated to include the new fields. Bumped to 0.4.0 (additive feature, backward-compatible).
+
+**Migration:** No changes required. Existing handlers that do not use ERP identity continue to work identically. Read `ctx.employee_no`, `ctx.erp_identifier`, and `ctx.erp_department_identifiers` in your `handle()` method when you need to resolve which ERP record the tool call is acting on behalf of.
+
+---
+
 ## v0.3.0 Release Notes
 
 ### v0.3.0 — feat: connector-declared tool sensitivity

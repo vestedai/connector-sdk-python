@@ -164,6 +164,9 @@ Read-only value object passed to every handler.
 | `deadline_ms` | `int` | Remaining deadline in ms. Handler should respect this. |
 | `logger` | `logging.LoggerAdapter` | Pre-bound with `invocation_id`, `agent_key`, `tool_key`. |
 | `invoked_at` | `datetime` | Wall-clock time the hub dispatched the call (UTC). |
+| `employee_no` | `str` | Nullable. The calling user's HR/ERP employee number. Empty string when unset. Source: `ToolCallRequest.employee_no` (proto field 10). |
+| `erp_identifier` | `str` | Nullable. The calling user's ERP system identifier (e.g. SAP user ID). Empty string when unset. Source: `ToolCallRequest.erp_identifier` (proto field 11). |
+| `erp_department_identifiers` | `tuple[str, ...]` | Nullable. ERP identifiers of every department the calling user belongs to within the run's org. Empty tuple when the user has no departments or none carry an ERP id. Source: `ToolCallRequest.erp_department_identifiers` (proto field 12). |
 
 Helpers:
 

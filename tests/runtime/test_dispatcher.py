@@ -130,6 +130,76 @@ async def test_dispatch_uses_invocation_id_on_response() -> None:
 
 
 @pytest.mark.asyncio
+async def test_dispatch_ctx_erp_fields_populated() -> None:
+    """ERP identity fields on ToolCallRequest surface on the ToolContext."""
+    captured_ctx: list[ToolContext] = []
+
+    @tool("test.ctx_capture_erp", description="Capture ctx for assertion.")
+    class CtxCaptureErp(ToolHandler):
+        class Args(BaseModel):
+            pass
+
+        async def handle(self, args: Args, ctx: ToolContext) -> dict[str, object]:  # type: ignore[override]
+            captured_ctx.append(ctx)
+            return {}
+
+    client = FakeClient()
+    dispatcher = Dispatcher(
+        {CtxCaptureErp.__vested_tool__.key: CtxCaptureErp.__vested_tool__},  # type: ignore[attr-defined]
+        client,
+    )
+    req = pb.ToolCallRequest()
+    req.invocation_id = "erp-test-1"
+    req.tool_key = "test.ctx_capture_erp"
+    req.args_json = b"{}"
+    req.employee_no = "EMP-001"
+    req.erp_identifier = "SAP-98765"
+    req.erp_department_identifiers.extend(["DEPT-A", "DEPT-B"])
+
+    await dispatcher._handle(req)
+
+    assert len(captured_ctx) == 1
+    ctx = captured_ctx[0]
+    assert ctx.employee_no == "EMP-001"
+    assert ctx.erp_identifier == "SAP-98765"
+    assert ctx.erp_department_identifiers == ("DEPT-A", "DEPT-B")
+
+
+@pytest.mark.asyncio
+async def test_dispatch_ctx_erp_fields_default_when_absent() -> None:
+    """ERP identity fields default to empty string / empty tuple when absent."""
+    captured_ctx: list[ToolContext] = []
+
+    @tool("test.ctx_capture_erp_default", description="Capture ctx defaults.")
+    class CtxCaptureErpDefault(ToolHandler):
+        class Args(BaseModel):
+            pass
+
+        async def handle(self, args: Args, ctx: ToolContext) -> dict[str, object]:  # type: ignore[override]
+            captured_ctx.append(ctx)
+            return {}
+
+    client = FakeClient()
+    dispatcher = Dispatcher(
+        {CtxCaptureErpDefault.__vested_tool__.key: CtxCaptureErpDefault.__vested_tool__},  # type: ignore[attr-defined]
+        client,
+    )
+    req = pb.ToolCallRequest()
+    req.invocation_id = "erp-default-1"
+    req.tool_key = "test.ctx_capture_erp_default"
+    req.args_json = b"{}"
+    # erp fields intentionally not set
+
+    await dispatcher._handle(req)
+
+    assert len(captured_ctx) == 1
+    ctx = captured_ctx[0]
+    assert ctx.employee_no == ""
+    assert ctx.erp_identifier == ""
+    assert ctx.erp_department_identifiers == ()
+
+
+@pytest.mark.asyncio
 async def test_dispatch_spawns_task_for_concurrency() -> None:
     """dispatch() (not _handle) should return immediately, leaving the
     actual work for the spawned Task."""

@@ -169,7 +169,7 @@ class DeclIssue(_message.Message):
     def __init__(self, path: _Optional[str] = ..., code: _Optional[str] = ..., message: _Optional[str] = ...) -> None: ...
 
 class ToolCallRequest(_message.Message):
-    __slots__ = ("invocation_id", "agent_key", "tool_key", "args_json", "organization_id", "user_id", "conversation_id", "deadline_ms", "user_email")
+    __slots__ = ("invocation_id", "agent_key", "tool_key", "args_json", "organization_id", "user_id", "conversation_id", "deadline_ms", "user_email", "employee_no", "erp_identifier", "erp_department_identifiers")
     INVOCATION_ID_FIELD_NUMBER: _ClassVar[int]
     AGENT_KEY_FIELD_NUMBER: _ClassVar[int]
     TOOL_KEY_FIELD_NUMBER: _ClassVar[int]
@@ -179,6 +179,9 @@ class ToolCallRequest(_message.Message):
     CONVERSATION_ID_FIELD_NUMBER: _ClassVar[int]
     DEADLINE_MS_FIELD_NUMBER: _ClassVar[int]
     USER_EMAIL_FIELD_NUMBER: _ClassVar[int]
+    EMPLOYEE_NO_FIELD_NUMBER: _ClassVar[int]
+    ERP_IDENTIFIER_FIELD_NUMBER: _ClassVar[int]
+    ERP_DEPARTMENT_IDENTIFIERS_FIELD_NUMBER: _ClassVar[int]
     invocation_id: str
     agent_key: str
     tool_key: str
@@ -188,7 +191,10 @@ class ToolCallRequest(_message.Message):
     conversation_id: str
     deadline_ms: int
     user_email: str
-    def __init__(self, invocation_id: _Optional[str] = ..., agent_key: _Optional[str] = ..., tool_key: _Optional[str] = ..., args_json: _Optional[bytes] = ..., organization_id: _Optional[str] = ..., user_id: _Optional[str] = ..., conversation_id: _Optional[str] = ..., deadline_ms: _Optional[int] = ..., user_email: _Optional[str] = ...) -> None: ...
+    employee_no: str
+    erp_identifier: str
+    erp_department_identifiers: _containers.RepeatedScalarFieldContainer[str]
+    def __init__(self, invocation_id: _Optional[str] = ..., agent_key: _Optional[str] = ..., tool_key: _Optional[str] = ..., args_json: _Optional[bytes] = ..., organization_id: _Optional[str] = ..., user_id: _Optional[str] = ..., conversation_id: _Optional[str] = ..., deadline_ms: _Optional[int] = ..., user_email: _Optional[str] = ..., employee_no: _Optional[str] = ..., erp_identifier: _Optional[str] = ..., erp_department_identifiers: _Optional[_Iterable[str]] = ...) -> None: ...
 
 class HeartbeatAck(_message.Message):
     __slots__ = ("at",)

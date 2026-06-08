@@ -92,6 +92,9 @@ class Dispatcher:
             conversation_id=str(getattr(req, "conversation_id", "")),
             user_email=str(getattr(req, "user_email", "")),
             user_id=int(getattr(req, "user_id", 0) or 0),
+            employee_no=str(getattr(req, "employee_no", "")),
+            erp_identifier=str(getattr(req, "erp_identifier", "")),
+            erp_department_identifiers=tuple(getattr(req, "erp_department_identifiers", ())),
         )
 
     @staticmethod

@@ -35,6 +35,9 @@ class ToolContext:
     conversation_id: str
     user_email: str = ""
     user_id: int = 0
+    employee_no: str = ""
+    erp_identifier: str = ""
+    erp_department_identifiers: tuple[str, ...] = ()
 
 
 @dataclass

@@ -5,7 +5,7 @@ import warnings
 
 from . import connector_hub_pb2 as vested_dot_v1_dot_connector__hub__pb2
 
-GRPC_GENERATED_VERSION = '1.80.0'
+GRPC_GENERATED_VERSION = '1.81.0'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
@@ -25,7 +25,7 @@ if _version_not_supported:
     )
 
 
-class ConnectorHubStub(object):
+class ConnectorHubStub:
     """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
@@ -41,7 +41,7 @@ class ConnectorHubStub(object):
                 _registered_method=True)
 
 
-class ConnectorHubServicer(object):
+class ConnectorHubServicer:
     """Missing associated documentation comment in .proto file."""
 
     def Connect(self, request_iterator, context):
@@ -66,7 +66,7 @@ def add_ConnectorHubServicer_to_server(servicer, server):
 
 
  # This class is part of an EXPERIMENTAL API.
-class ConnectorHub(object):
+class ConnectorHub:
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod

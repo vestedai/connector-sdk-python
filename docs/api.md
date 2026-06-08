@@ -97,6 +97,7 @@ from vested_connect import tool, ToolHandler, ToolContext, BaseModel, Field
     key="myns.orders.get",
     name="Get order",
     description="Returns a single order by ID.",
+    sensitivity="read",        # optional; see allowed values below
     deadline_ms=5000,          # optional; default 30 000
     max_result_bytes=65536,    # optional; default 1 MiB
 )
@@ -109,6 +110,20 @@ class GetOrder(ToolHandler):
 ```
 
 The input JSON Schema is auto-generated from the inner `Args` Pydantic model using `Args.model_json_schema()`. If you need fine-grained control, pass `input_schema: dict` to `@tool` instead of defining `Args`.
+
+### `sensitivity` parameter
+
+The optional `sensitivity` keyword lets the connector declare the risk level of a tool. The hub stores this alongside the tool and exposes it in the admin UI; admins can later override it without redeploying the connector.
+
+| Value | Meaning |
+|---|---|
+| `"read"` | Read-only; no side-effects. |
+| `"write"` | Creates or updates data. |
+| `"destructive"` | Deletes or irreversibly modifies data. |
+| `"external_call"` | Makes a call to an external system (e.g. payment, email, webhook). |
+| `"medium"` | Catch-all moderate-risk bucket. |
+
+Omitting `sensitivity` (or passing `""`) leaves the field unset; the hub will default it to `external_call`. Passing any value outside the allowed set raises `ValueError` at decoration time — not at runtime.
 
 Output schema is inferred from the return type annotation if it is a Pydantic model subclass; otherwise pass `output_schema: dict` explicitly.
 

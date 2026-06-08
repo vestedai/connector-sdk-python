@@ -81,7 +81,7 @@ class InstructionDecl(_message.Message):
     def __init__(self, type: _Optional[str] = ..., format: _Optional[str] = ..., body: _Optional[str] = ..., position: _Optional[int] = ...) -> None: ...
 
 class ToolDecl(_message.Message):
-    __slots__ = ("key", "name", "description", "input_schema_json", "output_schema_json", "default_deadline_ms", "max_result_bytes")
+    __slots__ = ("key", "name", "description", "input_schema_json", "output_schema_json", "default_deadline_ms", "max_result_bytes", "sensitivity")
     KEY_FIELD_NUMBER: _ClassVar[int]
     NAME_FIELD_NUMBER: _ClassVar[int]
     DESCRIPTION_FIELD_NUMBER: _ClassVar[int]
@@ -89,6 +89,7 @@ class ToolDecl(_message.Message):
     OUTPUT_SCHEMA_JSON_FIELD_NUMBER: _ClassVar[int]
     DEFAULT_DEADLINE_MS_FIELD_NUMBER: _ClassVar[int]
     MAX_RESULT_BYTES_FIELD_NUMBER: _ClassVar[int]
+    SENSITIVITY_FIELD_NUMBER: _ClassVar[int]
     key: str
     name: str
     description: str
@@ -96,7 +97,8 @@ class ToolDecl(_message.Message):
     output_schema_json: bytes
     default_deadline_ms: int
     max_result_bytes: int
-    def __init__(self, key: _Optional[str] = ..., name: _Optional[str] = ..., description: _Optional[str] = ..., input_schema_json: _Optional[bytes] = ..., output_schema_json: _Optional[bytes] = ..., default_deadline_ms: _Optional[int] = ..., max_result_bytes: _Optional[int] = ...) -> None: ...
+    sensitivity: str
+    def __init__(self, key: _Optional[str] = ..., name: _Optional[str] = ..., description: _Optional[str] = ..., input_schema_json: _Optional[bytes] = ..., output_schema_json: _Optional[bytes] = ..., default_deadline_ms: _Optional[int] = ..., max_result_bytes: _Optional[int] = ..., sensitivity: _Optional[str] = ...) -> None: ...
 
 class ToolCallResponse(_message.Message):
     __slots__ = ("invocation_id", "result_json", "error", "duration_ms")

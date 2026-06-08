@@ -58,3 +58,33 @@ def test_fingerprint_differs_when_declarations_differ() -> None:
     assert baseline != no_tools
     no_agents = compute_fingerprint([], _tools())  # type: ignore[arg-type]
     assert baseline != no_agents
+
+
+def test_fingerprint_differs_when_sensitivity_differs() -> None:
+    """A change in a tool's sensitivity must produce a different fingerprint
+    so the hub falls through to Laravel reconcile and picks up the new value."""
+
+    @tool("t.alpha.delete", description="delete something", sensitivity="destructive")
+    class _Destructive(ToolHandler):
+        class Args(BaseModel):
+            id: str = Field(description="id")
+
+        async def handle(self, args, ctx):  # type: ignore[no-untyped-def]
+            return {}
+
+    @tool("t.alpha.delete2", description="delete something")  # sensitivity="" (default)
+    class _DefaultSens(ToolHandler):
+        class Args(BaseModel):
+            id: str = Field(description="id")
+
+        async def handle(self, args, ctx):  # type: ignore[no-untyped-def]
+            return {}
+
+    tools_destructive = {"t.alpha.delete": _Destructive.__vested_tool__}  # type: ignore[attr-defined]
+    tools_default = {"t.alpha.delete2": _DefaultSens.__vested_tool__}  # type: ignore[attr-defined]
+
+    fp_destructive = compute_fingerprint([], tools_destructive)
+    fp_default = compute_fingerprint([], tools_default)
+    assert fp_destructive != fp_default, (
+        "fingerprints should differ when sensitivity differs"
+    )

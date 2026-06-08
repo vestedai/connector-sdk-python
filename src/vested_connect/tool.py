@@ -10,6 +10,16 @@ from pydantic import BaseModel, ValidationError
 
 from .errors import ToolValidationError
 
+#: Valid values for the ``sensitivity`` parameter on :func:`tool`.
+#: Empty string (the default) means "let the hub default to ``external_call``."
+TOOL_SENSITIVITIES: tuple[str, ...] = (
+    "read",
+    "write",
+    "destructive",
+    "external_call",
+    "medium",
+)
+
 
 @dataclass(frozen=True, slots=True)
 class ToolContext:
@@ -34,6 +44,7 @@ class ToolDeclaration:
     key: str
     name: str
     description: str
+    sensitivity: str
     input_schema: dict[str, Any]
     output_schema: dict[str, Any]
     default_deadline_ms: int = 30_000
@@ -78,6 +89,7 @@ def tool(
     key: str,
     *,
     description: str,
+    sensitivity: str = "",
     default_deadline_ms: int = 30_000,
     max_result_bytes: int = 1_048_576,
 ) -> Callable[[type[ToolHandler]], type[ToolHandler]]:
@@ -88,7 +100,23 @@ def tool(
     ``Args.model_json_schema()`` — Pydantic descriptions on
     ``Field(description=...)`` flow through onto the schema, so the LLM
     sees them.
+
+    Args:
+        key: Dot-namespaced tool key (e.g. ``"acme.lookup"``).
+        description: Human-readable description shown to the LLM.
+        sensitivity: Connector-declared sensitivity hint.  One of
+            ``"read"``, ``"write"``, ``"destructive"``, ``"external_call"``,
+            ``"medium"``.  Empty (the default) means "unset" — the hub will
+            default to ``external_call`` and the admin can override it later.
+        default_deadline_ms: Per-call timeout in milliseconds (default 30 s).
+        max_result_bytes: Maximum serialised result size (default 1 MiB).
     """
+    if sensitivity and sensitivity not in TOOL_SENSITIVITIES:
+        raise ValueError(
+            f"@tool({key!r}) sensitivity must be one of "
+            f"{', '.join(repr(s) for s in TOOL_SENSITIVITIES)}; "
+            f"got {sensitivity!r}"
+        )
 
     def wrap(cls: type[ToolHandler]) -> type[ToolHandler]:
         if not isinstance(cls, type) or not issubclass(cls, ToolHandler):
@@ -115,6 +143,7 @@ def tool(
             key=key,
             name=cls.__name__,
             description=description,
+            sensitivity=sensitivity,
             input_schema=input_schema,
             output_schema=output_schema,
             default_deadline_ms=default_deadline_ms,

@@ -52,6 +52,7 @@ def compute_fingerprint(
                 "key": t.key,
                 "name": t.name,
                 "description": t.description,
+                "sensitivity": t.sensitivity,
                 "input_schema": t.input_schema,
                 "output_schema": t.output_schema,
                 "default_deadline_ms": t.default_deadline_ms,

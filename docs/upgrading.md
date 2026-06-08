@@ -62,6 +62,16 @@ The following are PHP-specific implementation details. They are documented here 
 
 ---
 
+## v0.3.0 Release Notes
+
+### v0.3.0 — feat: connector-declared tool sensitivity
+
+`@tool` gains an optional `sensitivity` keyword parameter (`"read"`, `"write"`, `"destructive"`, `"external_call"`, `"medium"`). Omitting it (or passing `""`) leaves it unset; the hub defaults to `external_call`. The value is threaded into the wire `ToolDecl` proto (field 8) and included in the baseline fingerprint so a change in sensitivity triggers a hub reconcile. Invalid values raise `ValueError` at decoration time with a message listing the allowed values. Bumped to 0.3.0 (additive feature, backward-compatible).
+
+**Migration:** No changes required. Existing `@tool` declarations without `sensitivity` continue to work identically. Add `sensitivity=` only when you want to advertise a specific risk level.
+
+---
+
 ## v0.2.x Patch Notes
 
 ### v0.2.1 — fix: send non-empty baseline_fingerprint at Register

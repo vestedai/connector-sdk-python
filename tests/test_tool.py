@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import Any
+
 import pytest
 
 from vested_connect import BaseModel, Field, ToolContext, ToolHandler, tool
@@ -74,3 +78,74 @@ def test_tool_context_construction() -> None:
     )
     assert ctx.org_id == 1
     assert ctx.agent_key == "a"
+
+
+# ---------------------------------------------------------------------------
+# sensitivity tests
+# ---------------------------------------------------------------------------
+
+
+def test_tool_decorator_sensitivity_default_is_empty() -> None:
+    """Omitting sensitivity defaults to empty string (hub will apply its own default)."""
+    decl = InventoryCheck.__vested_tool__  # type: ignore[attr-defined]
+    assert decl.sensitivity == ""
+
+
+def test_tool_decorator_stamps_valid_sensitivity() -> None:
+    """A valid sensitivity value is stamped onto the ToolDeclaration."""
+
+    @tool("acme.delete_item", description="Destroy something.", sensitivity="destructive")
+    class DeleteItem(ToolHandler):
+        class Args(BaseModel):
+            item_id: str
+
+        async def handle(self, args: Args, ctx: ToolContext) -> dict[str, Any]:  # type: ignore[override]
+            return {}
+
+    decl = DeleteItem.__vested_tool__  # type: ignore[attr-defined]
+    assert decl.sensitivity == "destructive"
+
+
+def test_tool_decorator_all_valid_sensitivities_accepted() -> None:
+    """Each member of TOOL_SENSITIVITIES is accepted without raising."""
+    from vested_connect.tool import TOOL_SENSITIVITIES
+
+    for sens in TOOL_SENSITIVITIES:
+
+        @tool(f"acme.sens.{sens}", description="test", sensitivity=sens)
+        class _T(ToolHandler):
+            class Args(BaseModel):
+                x: str
+
+            async def handle(self, args: Args, ctx: ToolContext) -> dict[str, Any]:  # type: ignore[override]
+                return {}
+
+        decl = _T.__vested_tool__  # type: ignore[attr-defined]
+        assert decl.sensitivity == sens
+
+
+def test_tool_decorator_rejects_invalid_sensitivity() -> None:
+    """An unrecognised sensitivity value must raise ValueError at decoration time."""
+    with pytest.raises(ValueError, match="sensitivity must be one of"):
+        @tool("acme.bad_sens", description="bad", sensitivity="super_dangerous")
+        class _Bad(ToolHandler):
+            class Args(BaseModel):
+                x: str
+
+            async def handle(self, args: Args, ctx: ToolContext) -> dict[str, Any]:  # type: ignore[override]
+                return {}
+
+
+def test_tool_decorator_rejects_invalid_sensitivity_includes_allowed() -> None:
+    """The ValueError message lists the allowed values."""
+    with pytest.raises(ValueError, match="read") as exc_info:
+        @tool("acme.bad2", description="bad", sensitivity="unknown_val")
+        class _Bad2(ToolHandler):
+            class Args(BaseModel):
+                x: str
+
+            async def handle(self, args: Args, ctx: ToolContext) -> dict[str, Any]:  # type: ignore[override]
+                return {}
+
+    msg = str(exc_info.value)
+    assert "unknown_val" in msg

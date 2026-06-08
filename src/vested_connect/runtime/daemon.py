@@ -170,4 +170,5 @@ class Daemon:
                 t.output_schema_json = _json.dumps(tool_decl.output_schema).encode()
                 t.default_deadline_ms = tool_decl.default_deadline_ms
                 t.max_result_bytes = tool_decl.max_result_bytes
+                t.sensitivity = tool_decl.sensitivity
         return msg

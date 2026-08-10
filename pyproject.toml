@@ -25,6 +25,10 @@ dependencies = [
     "protobuf>=4.25",
     "pydantic>=2.5,<3",
     "PyJWT>=2.8",
+    # Explicit, not transitive: PyJWT is pinned WITHOUT the [crypto] extra, so
+    # cryptography is not guaranteed present. The credential opener needs it for
+    # ECDH / HKDF / AES-GCM.
+    "cryptography>=42",
 ]
 
 [project.optional-dependencies]

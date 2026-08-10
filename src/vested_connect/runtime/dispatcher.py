@@ -5,8 +5,11 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+from collections.abc import Callable
 from typing import Any, Protocol
 
+from vested_connect.credential import CredentialOpener
+from vested_connect.credential_resolver import CredentialResolver
 from vested_connect.errors import ToolValidationError
 from vested_connect.proto import connector_hub_pb2 as pb
 from vested_connect.tool import ToolContext, ToolDeclaration, validate_args
@@ -32,9 +35,15 @@ class Dispatcher:
         self,
         registry: dict[str, ToolDeclaration],
         client: _Sender,
+        # None for connectors that declare no credential schema.
+        credential_opener: CredentialOpener | None = None,
+        # Lazy: the hub assigns the connector id at HelloAck, after construction.
+        connector_id: Callable[[], str] = lambda: "",
     ) -> None:
         self.registry = registry
         self.client = client
+        self._credential_opener = credential_opener
+        self._connector_id = connector_id
 
     def dispatch(self, req: pb.ToolCallRequest) -> None:
         """Fire-and-forget: spawn a Task; don't block the recv loop."""
@@ -82,8 +91,7 @@ class Dispatcher:
             return raw.decode("utf-8")
         return str(raw)
 
-    @staticmethod
-    def _build_ctx(req: pb.ToolCallRequest) -> ToolContext:
+    def _build_ctx(self, req: pb.ToolCallRequest) -> ToolContext:
         """Build ToolContext from request fields. Tolerate missing fields."""
         return ToolContext(
             org_id=int(getattr(req, "organization_id", 0) or 0),
@@ -95,6 +103,14 @@ class Dispatcher:
             employee_no=str(getattr(req, "employee_no", "")),
             erp_identifier=str(getattr(req, "erp_identifier", "")),
             erp_department_identifiers=tuple(getattr(req, "erp_department_identifiers", ())),
+            # Lazy: most tools never read the credential, and one that doesn't
+            # ask should neither pay for a decrypt nor fail because of one.
+            credentials=CredentialResolver(
+                self._credential_opener,
+                getattr(req, "credential_envelope_json", b"") or None,
+                self._connector_id,
+                str(getattr(req, "user_id", "")),
+            ),
         )
 
     @staticmethod

@@ -8,6 +8,7 @@ from typing import Any
 
 from pydantic import BaseModel, ValidationError
 
+from .credential_resolver import CredentialResolver, CredentialUnavailableError
 from .errors import ToolValidationError
 
 #: Valid values for the ``sensitivity`` parameter on :func:`tool`.
@@ -38,6 +39,28 @@ class ToolContext:
     employee_no: str = ""
     erp_identifier: str = ""
     erp_department_identifiers: tuple[str, ...] = ()
+    # Lazy credential access. None for connectors that declare no schema.
+    credentials: CredentialResolver | None = None
+
+    def has_credential(self) -> bool:
+        """True when the platform forwarded a sealed credential for this caller."""
+        return self.credentials is not None and self.credentials.has_credential()
+
+    def credential(self) -> dict[str, str]:
+        """The calling user's credentials for this integration, decrypted.
+
+        The envelope is opened and its identity binding verified inside the SDK,
+        so a connector author cannot skip the check that makes per-user auth
+        mean anything: an envelope sealed for another user raises rather than
+        returning someone else's secrets.
+        """
+        if self.credentials is None:
+            raise CredentialUnavailableError(
+                "No user credential was supplied for this tool call. Either this "
+                "connector declares no credential schema, or the platform refused "
+                "the call before dispatch."
+            )
+        return self.credentials.credential()
 
 
 @dataclass

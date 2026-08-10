@@ -249,7 +249,7 @@ class DeclIssue(_message.Message):
     def __init__(self, path: _Optional[str] = ..., code: _Optional[str] = ..., message: _Optional[str] = ...) -> None: ...
 
 class ToolCallRequest(_message.Message):
-    __slots__ = ("invocation_id", "agent_key", "tool_key", "args_json", "organization_id", "user_id", "conversation_id", "deadline_ms", "user_email", "employee_no", "erp_identifier", "erp_department_identifiers", "cursor", "page_size")
+    __slots__ = ("invocation_id", "agent_key", "tool_key", "args_json", "organization_id", "user_id", "conversation_id", "deadline_ms", "user_email", "employee_no", "erp_identifier", "erp_department_identifiers", "cursor", "page_size", "credential_envelope_json")
     INVOCATION_ID_FIELD_NUMBER: _ClassVar[int]
     AGENT_KEY_FIELD_NUMBER: _ClassVar[int]
     TOOL_KEY_FIELD_NUMBER: _ClassVar[int]
@@ -264,6 +264,7 @@ class ToolCallRequest(_message.Message):
     ERP_DEPARTMENT_IDENTIFIERS_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     PAGE_SIZE_FIELD_NUMBER: _ClassVar[int]
+    CREDENTIAL_ENVELOPE_JSON_FIELD_NUMBER: _ClassVar[int]
     invocation_id: str
     agent_key: str
     tool_key: str
@@ -278,7 +279,8 @@ class ToolCallRequest(_message.Message):
     erp_department_identifiers: _containers.RepeatedScalarFieldContainer[str]
     cursor: str
     page_size: int
-    def __init__(self, invocation_id: _Optional[str] = ..., agent_key: _Optional[str] = ..., tool_key: _Optional[str] = ..., args_json: _Optional[bytes] = ..., organization_id: _Optional[str] = ..., user_id: _Optional[str] = ..., conversation_id: _Optional[str] = ..., deadline_ms: _Optional[int] = ..., user_email: _Optional[str] = ..., employee_no: _Optional[str] = ..., erp_identifier: _Optional[str] = ..., erp_department_identifiers: _Optional[_Iterable[str]] = ..., cursor: _Optional[str] = ..., page_size: _Optional[int] = ...) -> None: ...
+    credential_envelope_json: bytes
+    def __init__(self, invocation_id: _Optional[str] = ..., agent_key: _Optional[str] = ..., tool_key: _Optional[str] = ..., args_json: _Optional[bytes] = ..., organization_id: _Optional[str] = ..., user_id: _Optional[str] = ..., conversation_id: _Optional[str] = ..., deadline_ms: _Optional[int] = ..., user_email: _Optional[str] = ..., employee_no: _Optional[str] = ..., erp_identifier: _Optional[str] = ..., erp_department_identifiers: _Optional[_Iterable[str]] = ..., cursor: _Optional[str] = ..., page_size: _Optional[int] = ..., credential_envelope_json: _Optional[bytes] = ...) -> None: ...
 
 class HeartbeatAck(_message.Message):
     __slots__ = ("at",)

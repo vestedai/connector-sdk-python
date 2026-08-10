@@ -14,6 +14,7 @@ from .credential_handler import (
     CredentialValidation,
     UserCredentialHandler,
 )
+from .credential_resolver import CredentialResolver, CredentialUnavailableError
 from .errors import ConnectorError, TokenError, ToolValidationError
 from .tool import ToolContext, ToolHandler, tool
 
@@ -35,6 +36,8 @@ __all__ = [
     "CredentialOpDispatcher",
     "CredentialValidation",
     "UserCredentialHandler",
+    "CredentialResolver",
+    "CredentialUnavailableError",
 ]
 
 __version__ = "0.4.0"

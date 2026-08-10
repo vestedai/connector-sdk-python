@@ -11,7 +11,7 @@ from vested_connect.credential_resolver import (
 
 FIXTURE = json.loads(
     (
-        Path(__file__).parents[2] / "testdata" / "credential-envelope-vectors.json"
+        Path(__file__).parents[1] / "testdata" / "credential-envelope-vectors.json"
     ).read_text()
 )
 VECTOR = FIXTURE["vectors"][0]

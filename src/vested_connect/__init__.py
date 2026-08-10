@@ -8,6 +8,12 @@ from pydantic import BaseModel, Field
 from .agent import Instruction, agent
 from .app import ConnectorApp
 from .credential import CredentialError, CredentialOpener
+from .credential_handler import (
+    CredentialContext,
+    CredentialOpDispatcher,
+    CredentialValidation,
+    UserCredentialHandler,
+)
 from .errors import ConnectorError, TokenError, ToolValidationError
 from .tool import ToolContext, ToolHandler, tool
 
@@ -25,6 +31,10 @@ __all__ = [
     "ToolValidationError",
     "CredentialOpener",
     "CredentialError",
+    "CredentialContext",
+    "CredentialOpDispatcher",
+    "CredentialValidation",
+    "UserCredentialHandler",
 ]
 
 __version__ = "0.4.0"

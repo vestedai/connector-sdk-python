@@ -8,6 +8,7 @@ import os
 import socket
 from typing import TYPE_CHECKING
 
+from vested_connect.credential_handler import CredentialOpDispatcher
 from vested_connect.errors import ConnectorError, TokenError
 from vested_connect.proto import connector_hub_pb2 as pb
 
@@ -41,11 +42,14 @@ class Daemon:
         *,
         signals: SignalHandler,
         dispatcher: Dispatcher | None = None,
+        credential_ops: CredentialOpDispatcher | None = None,
         recv_timeout_s: float = 0.1,
     ) -> None:
         self.app = app
         self.client = client
         self.signals = signals
+        # None when the connector declares no per-user credential handler.
+        self._credential_ops = credential_ops
         self.handshake_completed = False
         self._heartbeat: HeartbeatTimer | None = None
         self._dispatcher = dispatcher
@@ -119,6 +123,15 @@ class Daemon:
                     )
                 else:
                     self._dispatcher.dispatch(msg.tool_call_request)
+            elif msg.HasField("credential_op_request"):
+                # Answered inline: a credential op is one call to one system and
+                # the platform is waiting on a bounded deadline. Silence would
+                # make it wait the deadline out.
+                if self._credential_ops is not None:
+                    resp = self._credential_ops.dispatch(msg.credential_op_request)
+                    await self.client.send(
+                        pb.ConnectorMsg(credential_op_response=resp)
+                    )
             elif msg.HasField("heartbeat_ack"):
                 pass  # no-op
             elif msg.HasField("go_away"):

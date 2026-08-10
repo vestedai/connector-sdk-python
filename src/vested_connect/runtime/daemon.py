@@ -28,7 +28,7 @@ logger = logging.getLogger("vested_connect.daemon")
 # Reported in the Hello frame and stored as connectors.current_sdk_version,
 # so the admin UI shows it. MUST track pyproject.toml — it had drifted to 0.2.0
 # while the package was 0.4.0, making the operator view actively misleading.
-SDK_VERSION = "0.5.1"
+SDK_VERSION = "0.5.2"
 
 
 class Daemon:

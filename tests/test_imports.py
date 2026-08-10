@@ -6,4 +6,4 @@ def test_proto_imports() -> None:
 
 def test_sdk_version() -> None:
     import vested_connect
-    assert vested_connect.__version__ == "0.4.0"
+    assert vested_connect.__version__ == "0.5.0"

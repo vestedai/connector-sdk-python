@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from typing import Any
 
@@ -76,6 +76,9 @@ class ToolDeclaration:
     default_deadline_ms: int = 30_000
     max_result_bytes: int = 1_048_576
     handler_cls: type[ToolHandler] | None = None
+    #: Agent keys this tool binds to. Empty = the namespace-prefix rule.
+    #: See vested_connect.tool_binding.
+    agents: tuple[str, ...] = ()
 
 
 class ToolHandler:
@@ -118,6 +121,7 @@ def tool(
     sensitivity: str = "",
     default_deadline_ms: int = 30_000,
     max_result_bytes: int = 1_048_576,
+    agents: Sequence[str] | None = None,
 ) -> Callable[[type[ToolHandler]], type[ToolHandler]]:
     """Class decorator: declare a tool.
 
@@ -175,6 +179,7 @@ def tool(
             default_deadline_ms=default_deadline_ms,
             max_result_bytes=max_result_bytes,
             handler_cls=cls,
+            agents=tuple(agents or ()),
         )
         return cls
 

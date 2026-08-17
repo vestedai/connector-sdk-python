@@ -12,6 +12,7 @@ from vested_connect.credential_handler import CredentialOpDispatcher
 from vested_connect.errors import ConnectorError, TokenError
 from vested_connect.proto import connector_hub_pb2 as pb
 
+from ..tool_binding import resolve_bindings
 from .fingerprint import compute_fingerprint
 from .heartbeat import HeartbeatTimer
 from .signals import SignalHandler
@@ -157,6 +158,7 @@ class Daemon:
         # without ever reconciling to Laravel, and agents/tools never land
         # in the DB. See runtime/fingerprint.py for the canonical shape.
         reg.baseline_fingerprint = compute_fingerprint(self.app.agents, self.app.tools)
+        bound = resolve_bindings(self.app.agents, self.app.tools)
         for agent_decl in self.app.agents:
             a = reg.agents.add()
             a.key = agent_decl.key
@@ -172,11 +174,10 @@ class Daemon:
                 idecl.format = instr.format
                 idecl.body = instr.body
                 idecl.position = instr.position
-            # Tools belonging to this agent (matched by namespace prefix).
-            namespace_prefix = agent_decl.key + "."
-            for tool_key, tool_decl in self.app.tools.items():
-                if not tool_key.startswith(namespace_prefix):
-                    continue
+            # Tools bound to this agent — by namespace prefix, or by the
+            # tool's own agents list. resolve_bindings is the single authority;
+            # the fingerprint reads the same resolution, so the two cannot drift.
+            for tool_decl in bound[agent_decl.key]:
                 t = a.tools.add()
                 t.key = tool_decl.key
                 t.name = tool_decl.name

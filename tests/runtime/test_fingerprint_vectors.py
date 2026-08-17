@@ -56,6 +56,7 @@ def _tool(t: dict) -> ToolDeclaration:
         output_schema=t["output_schema"],
         default_deadline_ms=t["default_deadline_ms"],
         max_result_bytes=t["max_result_bytes"],
+        agents=tuple(t.get("agents", ())),
     )
 
 

@@ -16,6 +16,8 @@ import hashlib
 import json
 from typing import TYPE_CHECKING
 
+from vested_connect.tool_binding import resolve_bindings
+
 if TYPE_CHECKING:
     from vested_connect.agent import AgentDeclaration
     from vested_connect.tool import ToolDeclaration
@@ -26,6 +28,12 @@ def compute_fingerprint(
     tools: dict[str, ToolDeclaration],
 ) -> str:
     """SHA256 hex over the canonical declaration shape."""
+    # Binding must come from resolve_bindings, NOT be re-derived here. The
+    # Register frame uses the same call, and a fingerprint that disagrees
+    # with the frame it summarises would let the hub short-circuit a
+    # registration whose content had in fact changed.
+    bound = resolve_bindings(agents, tools)
+
     canonical: dict[str, object] = {
         "agents": [
             {
@@ -44,6 +52,11 @@ def compute_fingerprint(
                     }
                     for i in sorted(a.instructions, key=lambda x: x.position)
                 ],
+                # Which tools this agent is BOUND to. Without it, re-pointing a
+                # tool at different agents leaves the fingerprint unchanged and
+                # the hub never reconciles the new binding. Safe to omit only
+                # while binding was derived from the tool key — it no longer is.
+                "tools": [t.key for t in bound[a.key]],
             }
             for a in sorted(agents, key=lambda x: x.key)
         ],

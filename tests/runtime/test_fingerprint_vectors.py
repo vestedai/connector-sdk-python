@@ -15,6 +15,7 @@ agent declarations and has never been comparable with these three.
 
 import json
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -26,7 +27,7 @@ VECTORS_PATH = Path(__file__).parents[2] / "testdata" / "fingerprint-vectors.jso
 VECTORS = json.loads(VECTORS_PATH.read_text())["vectors"]
 
 
-def _agent(a: dict) -> AgentDeclaration:
+def _agent(a: dict[str, Any]) -> AgentDeclaration:
     return AgentDeclaration(
         key=a["key"],
         name=a["name"],
@@ -46,7 +47,7 @@ def _agent(a: dict) -> AgentDeclaration:
     )
 
 
-def _tool(t: dict) -> ToolDeclaration:
+def _tool(t: dict[str, Any]) -> ToolDeclaration:
     return ToolDeclaration(
         key=t["key"],
         name=t["name"],
@@ -61,7 +62,7 @@ def _tool(t: dict) -> ToolDeclaration:
 
 
 @pytest.mark.parametrize("vector", VECTORS, ids=lambda v: v["name"])
-def test_fingerprint_matches_cross_sdk_vector(vector: dict) -> None:
+def test_fingerprint_matches_cross_sdk_vector(vector: dict[str, Any]) -> None:
     agents = [_agent(a) for a in vector["agents"]]
     tools = {t["key"]: _tool(t) for t in vector["tools"]}
 

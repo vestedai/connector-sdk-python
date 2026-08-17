@@ -5,10 +5,10 @@ from __future__ import annotations
 import logging
 
 from .agent import AgentDeclaration
-from .tool_binding import validate_bindings
 from .runtime.scanner import scan_module
 from .runtime.supervisor import run_supervised
 from .tool import ToolDeclaration
+from .tool_binding import validate_bindings
 
 
 class ConnectorApp:

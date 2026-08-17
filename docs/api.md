@@ -93,13 +93,12 @@ Declare a tool and bind it to a handler class. The class must subclass `ToolHand
 from vested_connect import tool, ToolHandler, ToolContext, BaseModel, Field
 
 @tool(
-    agent_key="myns.orders",
     key="myns.orders.get",
-    name="Get order",
     description="Returns a single order by ID.",
-    sensitivity="read",        # optional; see allowed values below
-    deadline_ms=5000,          # optional; default 30 000
-    max_result_bytes=65536,    # optional; default 1 MiB
+    sensitivity="read",            # optional; see allowed values below
+    default_deadline_ms=5000,      # optional; default 30 000
+    max_result_bytes=65536,        # optional; default 1 MiB
+    agents=["myns.orders"],        # optional; see below
 )
 class GetOrder(ToolHandler):
     class Args(BaseModel):
@@ -110,6 +109,23 @@ class GetOrder(ToolHandler):
 ```
 
 The input JSON Schema is auto-generated from the inner `Args` Pydantic model using `Args.model_json_schema()`. If you need fine-grained control, pass `input_schema: dict` to `@tool` instead of defining `Args`.
+
+### Binding a tool to agents
+
+By default a tool binds to the agent its key is namespaced under: `myapp.orders.get`
+belongs to agent `myapp.orders`, and nowhere else.
+
+To share one declaration across several agents, name them. The list is
+**authoritative, not additive** — the key's namespace confers nothing once a list
+is present, so a tool may live in one namespace and be callable only from another.
+`"*"` means every agent this connector declares, and cannot be combined with
+explicit keys.
+
+Refused before the worker dials the hub: an agent key this connector does not
+declare, `"*"` mixed with explicit keys, and a tool that neither matches an agent
+namespace nor names any agent (nothing could ever call it). Declaring a list that
+omits the agent named in the tool's own key is *legal* — it is how you say "lives
+here, callable from there" — and logs a startup warning so it is never silent.
 
 ### `sensitivity` parameter
 

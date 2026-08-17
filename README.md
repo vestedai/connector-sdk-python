@@ -53,7 +53,7 @@ This differs from writing your own LLM client. The connector does not call the L
 
 ## License + Status
 
-MIT. Current release: **v0.3.0** (asyncio + grpcio runtime, decorator API, Pydantic v2 schema generation, connector-declared tool sensitivity). On PyPI as [`vested-connect-sdk`](https://pypi.org/project/vested-connect-sdk/) and Docker Hub as [`vestedai/vested-ai-connector-sdk-python`](https://hub.docker.com/r/vestedai/vested-ai-connector-sdk-python).
+MIT. Current release: **v0.6.0** (asyncio + grpcio runtime, decorator API, Pydantic v2 schema generation, connector-declared tool sensitivity, `@tool(agents=[...])` shared across agents). On PyPI as [`vested-connect-sdk`](https://pypi.org/project/vested-connect-sdk/) and Docker Hub as [`vestedai/vested-ai-connector-sdk-python`](https://hub.docker.com/r/vestedai/vested-ai-connector-sdk-python).
 
 ## Other language SDKs
 

@@ -1,7 +1,11 @@
 import pytest
 
 from vested_connect.errors import ConnectorError
-from vested_connect.tool_binding import resolve_bindings, validate_bindings
+from vested_connect.tool_binding import (
+    resolve_bindings,
+    validate_bindings,
+    validate_hub_limits,
+)
 
 
 class _Agent:
@@ -121,3 +125,44 @@ def test_tool_matching_no_agent_and_naming_none_raises() -> None:
         validate_bindings(
             [_Agent("erp.data")], _map(_Tool("erp.shared.orphan")), lambda _m: None
         )
+
+
+# Learned the hard way on 2026-08-18: agents=["*"] on erp_bc's run_sql pushed
+# ONE agent from 30 tools to 31, one over that connector's limit, so the hub
+# rejected the whole Register — and with no declaration, BOTH the schema gate
+# and the credential gate refused every call for ~1 hour.
+
+def _bind(agent_keys: tuple[str, ...], tools: tuple[_Tool, ...]) -> dict[str, list[_Tool]]:
+    return resolve_bindings([_Agent(k) for k in agent_keys], {t.key: t for t in tools})
+
+
+def test_hub_limits_under_and_exactly_at_the_limit_do_not_raise() -> None:
+    bound = _bind(("erp.data",), (_Tool("erp.data.a"), _Tool("erp.data.b")))
+    validate_hub_limits(bound, 3)
+    # The hub refuses 31 against 30, so the limit itself is allowed. Off-by-one
+    # here would ground a connector the hub accepts.
+    validate_hub_limits(bound, 2)
+
+
+def test_hub_limits_over_the_limit_names_the_agent_and_counts() -> None:
+    bound = _bind(("erp.data",), (_Tool("erp.data.a"), _Tool("erp.data.b"), _Tool("erp.data.c")))
+    with pytest.raises(ConnectorError, match=r"erp\.data") as e:
+        validate_hub_limits(bound, 2)
+    assert "3 tools" in str(e.value)
+    assert "limit is 2" in str(e.value)
+
+
+def test_hub_limits_names_the_shared_tool_when_one_contributed() -> None:
+    bound = _bind(
+        ("erp.data", "erp.retail"),
+        (_Tool("erp.retail.a"), _Tool("erp.retail.b"), _Tool("erp.shared.run_sql", ("*",))),
+    )
+    with pytest.raises(ConnectorError, match=r"erp\.shared\.run_sql"):
+        validate_hub_limits(bound, 2)
+
+
+def test_hub_limits_zero_means_unknown() -> None:
+    # proto3 defaults uint32 to 0 and an older hub sends nothing; reading that
+    # as a real ceiling would ground every connector — this check inverted.
+    bound = _bind(("erp.data",), (_Tool("erp.data.a"), _Tool("erp.data.b")))
+    validate_hub_limits(bound, 0)

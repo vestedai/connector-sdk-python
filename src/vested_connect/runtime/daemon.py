@@ -12,7 +12,7 @@ from vested_connect.credential_handler import CredentialOpDispatcher
 from vested_connect.errors import ConnectorError, TokenError
 from vested_connect.proto import connector_hub_pb2 as pb
 
-from ..tool_binding import resolve_bindings
+from ..tool_binding import resolve_bindings, validate_hub_limits
 from .fingerprint import compute_fingerprint
 from .heartbeat import HeartbeatTimer
 from .signals import SignalHandler
@@ -81,7 +81,9 @@ class Daemon:
             )
 
             # 3. Register
-            register = self._build_register()
+            # The limit reaches the frame builder from HelloAck — the earliest
+            # it is knowable, being per-connector and sent only after dialling.
+            register = self._build_register(ack_msg.hello_ack.max_tools_per_agent)
             await self.client.send(register)
 
             # 4. RegisterAck
@@ -149,7 +151,7 @@ class Daemon:
                 return 1
         return 0
 
-    def _build_register(self) -> pb.ConnectorMsg:
+    def _build_register(self, max_tools_per_agent: int = 0) -> pb.ConnectorMsg:
         msg = pb.ConnectorMsg()
         reg = msg.register
         # SHA256 over the canonical declaration shape. Non-empty fingerprint
@@ -159,6 +161,10 @@ class Daemon:
         # in the DB. See runtime/fingerprint.py for the canonical shape.
         reg.baseline_fingerprint = compute_fingerprint(self.app.agents, self.app.tools)
         bound = resolve_bindings(self.app.agents, self.app.tools)
+
+        # Refuse a frame the hub would reject anyway, but name the agent rather
+        # than leave the developer mapping `agents[5].tools` back from an index.
+        validate_hub_limits(bound, max_tools_per_agent)
         for agent_decl in self.app.agents:
             a = reg.agents.add()
             a.key = agent_decl.key

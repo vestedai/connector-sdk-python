@@ -47,8 +47,8 @@ declaration to be added here.
 Four things, so you can size the work:
 
 1. **A `relational_source` declaration** naming the engine (`sqlserver` or
-   `mysql`), the key of a rowset tool that returns your schema, the key of your
-   free-form SQL tool, and which argument of that tool carries the SQL text.
+   `mysql`), the describe and query tools, which argument carries the SQL, and
+   which carries bind parameters.
 2. **A describe tool** returning the canonical model — logical entities, each
    with the set of *physical* tables that make it up, its join key, and its
    columns; plus the relations between them. This is the substantive part: one

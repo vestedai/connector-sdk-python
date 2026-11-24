@@ -13,6 +13,22 @@ from vested_connect.errors import ConnectorError, TokenError
 from vested_connect.proto import connector_hub_pb2 as pb
 from vested_connect.proto import connector_hub_pb2_grpc as pb_grpc
 
+# Liveness. gRPC core suppresses keepalive PINGs while no unary call is
+# pending, and the Connect bidi stream carries none in steady state — so on
+# a default channel a half-open socket (peer died without FIN/RST: relay
+# restart, WireGuard rekey, network partition) is invisible forever: writes
+# keep buffering, recv() never settles, the connector sits "unavailable"
+# until its pod restarts. Same failure class the PHP/Swoole SDK hit in
+# 2026-11-24 (six days of silent 100% CPU there). permit_without_calls is
+# required for exactly this reason. On a dead socket the PING times out,
+# the stream errors (AioRpcError -> ConnectorError below) and the
+# supervisor redials.
+CHANNEL_OPTIONS = [
+    ("grpc.keepalive_time_ms", 30_000),
+    ("grpc.keepalive_timeout_ms", 10_000),
+    ("grpc.keepalive_permit_without_calls", 1),
+]
+
 
 class GrpcClient:
     """Bidi stream to ConnectorHub.Connect.
@@ -36,9 +52,11 @@ class GrpcClient:
     async def __aenter__(self) -> GrpcClient:
         target = f"{self.host}:{self.port}"
         if self.insecure:
-            self._channel = aio.insecure_channel(target)
+            self._channel = aio.insecure_channel(target, options=CHANNEL_OPTIONS)
         else:
-            self._channel = aio.secure_channel(target, grpc.ssl_channel_credentials())
+            self._channel = aio.secure_channel(
+                target, grpc.ssl_channel_credentials(), options=CHANNEL_OPTIONS
+            )
         stub = pb_grpc.ConnectorHubStub(self._channel)  # type: ignore[no-untyped-call]
         metadata = (("x-connector-token", self.token),)
         self._stream = stub.Connect(self._outbound_gen(), metadata=metadata)
